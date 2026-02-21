@@ -362,6 +362,10 @@ class ArrayUtilsTest extends AbstractLangTest {
         assertTrue(ArrayUtils.contains(a, Double.POSITIVE_INFINITY));
         assertTrue(ArrayUtils.contains(a, Double.NEGATIVE_INFINITY));
         assertTrue(ArrayUtils.contains(a, Double.NaN));
+
+        assertTrue(ArrayUtils.contains(a, Double.POSITIVE_INFINITY, 0.1));
+        assertTrue(ArrayUtils.contains(a, Double.NEGATIVE_INFINITY, 0.1));
+        assertTrue(ArrayUtils.contains(a, Double.NaN, 0.1));
     }
 
     @Test
@@ -1135,17 +1139,21 @@ class ArrayUtilsTest extends AbstractLangTest {
     void testIndexOfDoubleNaN() {
         final double[] array = { Double.NEGATIVE_INFINITY, Double.NaN, Double.POSITIVE_INFINITY, Double.NaN };
         assertEquals(0, ArrayUtils.indexOf(array, Double.NEGATIVE_INFINITY));
+        assertEquals(0, ArrayUtils.indexOf(array, Double.NEGATIVE_INFINITY, (double) 0));
         assertEquals(1, ArrayUtils.indexOf(array, Double.NaN));
+        assertEquals(1, ArrayUtils.indexOf(array, Double.NaN, (double) 0));
         assertEquals(2, ArrayUtils.indexOf(array, Double.POSITIVE_INFINITY));
-
+        assertEquals(2, ArrayUtils.indexOf(array, Double.POSITIVE_INFINITY, (double) 0));
     }
 
     @Test
     void testIndexOfDoubleTolerance() {
         double[] array = null;
         assertEquals(-1, ArrayUtils.indexOf(array, (double) 0, (double) 0));
+        assertEquals(-1, ArrayUtils.indexOf(array, Double.NaN, (double) 0));
         array = new double[0];
         assertEquals(-1, ArrayUtils.indexOf(array, (double) 0, (double) 0));
+        assertEquals(-1, ArrayUtils.indexOf(array, Double.NaN, (double) 0));
         array = new double[]{0, 1, 2, 3, 0};
         assertEquals(0, ArrayUtils.indexOf(array, 0, 0.3));
         assertEquals(2, ArrayUtils.indexOf(array, 2.2, 0.35));
@@ -5618,6 +5626,7 @@ class ArrayUtilsTest extends AbstractLangTest {
         assertSame(ArrayUtils.EMPTY_BOOLEAN_ARRAY, ArrayUtils.subarray(ArrayUtils.EMPTY_BOOLEAN_ARRAY, 1, 2),
                 "empty array, object test");
         assertSame(ArrayUtils.EMPTY_BOOLEAN_ARRAY, ArrayUtils.subarray(array, 4, 1), "start > end, object test");
+        assertSame(ArrayUtils.EMPTY_BOOLEAN_ARRAY, ArrayUtils.subarray(array, 2147483647, -2147483648), "start > end, object test");
         assertSame(ArrayUtils.EMPTY_BOOLEAN_ARRAY, ArrayUtils.subarray(array, 3, 3), "start == end, object test");
         assertSame(ArrayUtils.EMPTY_BOOLEAN_ARRAY, ArrayUtils.subarray(array, 8733, 4),
                 "start overshoot, any end, object test");
@@ -5649,6 +5658,7 @@ class ArrayUtilsTest extends AbstractLangTest {
         // empty-return tests
         assertSame(ArrayUtils.EMPTY_BYTE_ARRAY, ArrayUtils.subarray(ArrayUtils.EMPTY_BYTE_ARRAY, 1, 2), "empty array, object test");
         assertSame(ArrayUtils.EMPTY_BYTE_ARRAY, ArrayUtils.subarray(array, 4, 1), "start > end, object test");
+        assertSame(ArrayUtils.EMPTY_BYTE_ARRAY, ArrayUtils.subarray(array, 2147483647, -2147483648), "start > end, possible overflow");
         assertSame(ArrayUtils.EMPTY_BYTE_ARRAY, ArrayUtils.subarray(array, 3, 3), "start == end, object test");
         assertSame(ArrayUtils.EMPTY_BYTE_ARRAY, ArrayUtils.subarray(array, 8733, 4), "start overshoot, any end, object test");
         // array type tests
@@ -5677,6 +5687,7 @@ class ArrayUtilsTest extends AbstractLangTest {
         // empty-return tests
         assertSame(ArrayUtils.EMPTY_DOUBLE_ARRAY, ArrayUtils.subarray(ArrayUtils.EMPTY_DOUBLE_ARRAY, 1, 2), "empty array, object test");
         assertSame(ArrayUtils.EMPTY_DOUBLE_ARRAY, ArrayUtils.subarray(array, 4, 1), "start > end, object test");
+        assertSame(ArrayUtils.EMPTY_DOUBLE_ARRAY, ArrayUtils.subarray(array, 2147483647, -2147483648), "start > end, possible overflow");
         assertSame(ArrayUtils.EMPTY_DOUBLE_ARRAY, ArrayUtils.subarray(array, 3, 3), "start == end, object test");
         assertSame(ArrayUtils.EMPTY_DOUBLE_ARRAY, ArrayUtils.subarray(array, 8733, 4), "start overshoot, any end, object test");
         // array type tests
@@ -5705,6 +5716,7 @@ class ArrayUtilsTest extends AbstractLangTest {
         // empty-return tests
         assertSame(ArrayUtils.EMPTY_FLOAT_ARRAY, ArrayUtils.subarray(ArrayUtils.EMPTY_FLOAT_ARRAY, 1, 2), "empty array, object test");
         assertSame(ArrayUtils.EMPTY_FLOAT_ARRAY, ArrayUtils.subarray(array, 4, 1), "start > end, object test");
+        assertSame(ArrayUtils.EMPTY_FLOAT_ARRAY, ArrayUtils.subarray(array, 2147483647, -2147483648), "start > end, possible overflow");
         assertSame(ArrayUtils.EMPTY_FLOAT_ARRAY, ArrayUtils.subarray(array, 3, 3), "start == end, object test");
         assertSame(ArrayUtils.EMPTY_FLOAT_ARRAY, ArrayUtils.subarray(array, 8733, 4), "start overshoot, any end, object test");
         // array type tests
@@ -5733,6 +5745,7 @@ class ArrayUtilsTest extends AbstractLangTest {
         // empty-return tests
         assertSame(ArrayUtils.EMPTY_INT_ARRAY, ArrayUtils.subarray(ArrayUtils.EMPTY_INT_ARRAY, 1, 2), "empty array, object test");
         assertSame(ArrayUtils.EMPTY_INT_ARRAY, ArrayUtils.subarray(array, 4, 1), "start > end, object test");
+        assertSame(ArrayUtils.EMPTY_INT_ARRAY, ArrayUtils.subarray(array, 2147483647, -2147483648), "start > end, possible overflow");
         assertSame(ArrayUtils.EMPTY_INT_ARRAY, ArrayUtils.subarray(array, 3, 3), "start == end, object test");
         assertSame(ArrayUtils.EMPTY_INT_ARRAY, ArrayUtils.subarray(array, 8733, 4), "start overshoot, any end, object test");
         // array type tests
@@ -5781,6 +5794,7 @@ class ArrayUtilsTest extends AbstractLangTest {
                 "empty array, object test");
 
         assertSame(ArrayUtils.EMPTY_LONG_ARRAY, ArrayUtils.subarray(array, 4, 1), "start > end, object test");
+        assertSame(ArrayUtils.EMPTY_LONG_ARRAY, ArrayUtils.subarray(array, 2147483647, -2147483648), "start > end, possible overflow");
 
         assertSame(ArrayUtils.EMPTY_LONG_ARRAY, ArrayUtils.subarray(array, 3, 3), "start == end, object test");
 
@@ -5808,6 +5822,7 @@ class ArrayUtilsTest extends AbstractLangTest {
         assertNull(ArrayUtils.subarray(nullArray, 0, 3), "null input");
         assertEquals("", StringUtils.join(ArrayUtils.subarray(ArrayUtils.EMPTY_OBJECT_ARRAY, 1, 2)), "empty array");
         assertEquals("", StringUtils.join(ArrayUtils.subarray(objectArray, 4, 2)), "start > end");
+        assertEquals("", StringUtils.join(ArrayUtils.subarray(objectArray, 2147483647, -2147483648)), "start > end");
         assertEquals("", StringUtils.join(ArrayUtils.subarray(objectArray, 3, 3)), "start == end");
         assertEquals("abcd", StringUtils.join(ArrayUtils.subarray(objectArray, -2, 4)), "start undershoot, normal end");
         assertEquals("", StringUtils.join(ArrayUtils.subarray(objectArray, 33, 4)), "start overshoot, any end");
@@ -5860,6 +5875,7 @@ class ArrayUtilsTest extends AbstractLangTest {
         assertSame(ArrayUtils.EMPTY_SHORT_ARRAY, ArrayUtils.subarray(ArrayUtils.EMPTY_SHORT_ARRAY, 1, 2),
                 "empty array, object test");
         assertSame(ArrayUtils.EMPTY_SHORT_ARRAY, ArrayUtils.subarray(array, 4, 1), "start > end, object test");
+        assertSame(ArrayUtils.EMPTY_SHORT_ARRAY, ArrayUtils.subarray(array, 2147483647, -2147483648), "start > end, possible overflow");
         assertSame(ArrayUtils.EMPTY_SHORT_ARRAY, ArrayUtils.subarray(array, 3, 3), "start == end, object test");
         assertSame(ArrayUtils.EMPTY_SHORT_ARRAY, ArrayUtils.subarray(array, 8733, 4),
                 "start overshoot, any end, object test");
@@ -5895,6 +5911,7 @@ class ArrayUtilsTest extends AbstractLangTest {
 
         assertSame(ArrayUtils.EMPTY_CHAR_ARRAY, ArrayUtils.subarray(ArrayUtils.EMPTY_CHAR_ARRAY, 1, 2), "empty array, object test");
         assertSame(ArrayUtils.EMPTY_CHAR_ARRAY, ArrayUtils.subarray(array, 4, 1), "start > end, object test");
+        assertSame(ArrayUtils.EMPTY_CHAR_ARRAY, ArrayUtils.subarray(array, 2147483647, -2147483648), "start > end, possible overflow");
         assertSame(ArrayUtils.EMPTY_CHAR_ARRAY, ArrayUtils.subarray(array, 3, 3), "start == end, object test");
         assertSame(ArrayUtils.EMPTY_CHAR_ARRAY, ArrayUtils.subarray(array, 8733, 4), "start overshoot, any end, object test");
 
