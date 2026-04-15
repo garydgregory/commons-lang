@@ -66,6 +66,7 @@ import org.junitpioneer.jupiter.WritesDefaultLocale;
 @WritesDefaultLocale
 class DateUtilsTest extends AbstractLangTest {
 
+    private static final Date MAX_DATE = new Date(Long.MAX_VALUE);
     private static final TimeZone TIME_ZONE_NY = TimeZones.getTimeZone("America/New_York");
     private static final TimeZone TIME_ZONE_DEFAULT = TimeZone.getDefault();
     private static final TimeZone TIME_ZONE_MET = TimeZones.getTimeZone("MET");
@@ -151,7 +152,7 @@ class DateUtilsTest extends AbstractLangTest {
                 Arguments.of(
                         // +292278994-08-17T07:12:55.807
                         LocalDateTime.of(292278994, 8, 17, 7, 12, 55, 807_000_000),
-                        new Date(Long.MAX_VALUE),
+                        MAX_DATE,
                         TimeZones.GMT
                 ),
                 // [3]
@@ -230,6 +231,7 @@ class DateUtilsTest extends AbstractLangTest {
     private Date date6;
     private Date date7;
     private Date date8;
+    private Date date9;
     private Calendar calAmPm1;
     private Calendar calAmPm2;
     private Calendar calAmPm3;
@@ -283,6 +285,7 @@ class DateUtilsTest extends AbstractLangTest {
             dateTimeParser.setTimeZone(TIME_ZONE_DEFAULT);
             TimeZone.setDefault(TIME_ZONE_DEFAULT);
         }
+        date9 = dateTimeParser.parse("March 30, 2003 01:10:00.000");
         calAmPm1 = Calendar.getInstance();
         calAmPm1.setTime(dateAmPm1);
         calAmPm2 = Calendar.getInstance();
@@ -530,6 +533,24 @@ class DateUtilsTest extends AbstractLangTest {
         assertEquals(dateTimeParser.parse("November 18, 2001 1:24:00.000"),
                 DateUtils.ceiling(date2, Calendar.MINUTE),
                 "ceiling minute-2 failed");
+        // Edge cases (LANG-771)
+        assertEquals(dateTimeParser.parse("March 30, 2003 01:10:00.000"),
+                DateUtils.ceiling(date9, Calendar.MINUTE),
+                "ceiling minute boundary failed");
+        final Date epoch = new Date(0);
+        assertEquals(epoch,
+                DateUtils.ceiling(epoch, Calendar.MINUTE),
+                "ceiling minute epoch failed");
+        final Date negative = new Date(-1);
+        assertEquals(new Date(0),
+                DateUtils.ceiling(negative, Calendar.MINUTE),
+                "ceiling minute negative failed");
+        assertThrows(ArithmeticException.class,
+                () -> DateUtils.ceiling(new Date(Long.MIN_VALUE), Calendar.MINUTE),
+                "ceiling minute Long.MIN_VALUE failed");
+        assertThrows(ArithmeticException.class,
+                () -> DateUtils.ceiling(new Date(Long.MAX_VALUE), Calendar.MINUTE),
+                "ceiling minute Long.MAX_VALUE failed");
         assertEquals(dateTimeParser.parse("February 12, 2002 12:34:57.000"),
                 DateUtils.ceiling(date1, Calendar.SECOND),
                 "ceiling second-1 failed");
@@ -641,7 +662,7 @@ class DateUtilsTest extends AbstractLangTest {
     @Test
     void testCeiling_Bugzilla_31395() throws Exception {
         // Bug 31395, large dates
-        final Date endOfTime = new Date(Long.MAX_VALUE); // fyi: Sun Aug 17 07:12:55 CET 292278994 -- 807 millis
+        final Date endOfTime = MAX_DATE; // fyi: Sun Aug 17 07:12:55 CET 292278994 -- 807 millis
         final GregorianCalendar endCal = new GregorianCalendar();
         endCal.setTime(endOfTime);
         assertThrows(ArithmeticException.class, () -> DateUtils.ceiling(endCal, Calendar.DATE));
@@ -735,15 +756,19 @@ class DateUtilsTest extends AbstractLangTest {
 
     @Test
     void testIsSameDay_Date() {
-        Date datea = new GregorianCalendar(2004, 6, 9, 13, 45).getTime();
-        Date dateb = new GregorianCalendar(2004, 6, 9, 13, 45).getTime();
-        assertTrue(DateUtils.isSameDay(datea, dateb));
-        dateb = new GregorianCalendar(2004, 6, 10, 13, 45).getTime();
-        assertFalse(DateUtils.isSameDay(datea, dateb));
-        datea = new GregorianCalendar(2004, 6, 10, 13, 45).getTime();
-        assertTrue(DateUtils.isSameDay(datea, dateb));
-        dateb = new GregorianCalendar(2005, 6, 10, 13, 45).getTime();
-        assertFalse(DateUtils.isSameDay(datea, dateb));
+        Date dateA = new GregorianCalendar(2004, 6, 9, 13, 45).getTime();
+        Date dateB = new GregorianCalendar(2004, 6, 9, 13, 45).getTime();
+        assertTrue(DateUtils.isSameDay(dateA, dateB));
+        dateB = new GregorianCalendar(2004, 6, 10, 13, 45).getTime();
+        assertFalse(DateUtils.isSameDay(dateA, dateB));
+        dateA = new GregorianCalendar(2004, 6, 10, 13, 45).getTime();
+        assertTrue(DateUtils.isSameDay(dateA, dateB));
+        dateB = new GregorianCalendar(2005, 6, 10, 13, 45).getTime();
+        assertFalse(DateUtils.isSameDay(dateA, dateB));
+        assertTrue(DateUtils.isSameDay(dateA, dateA));
+        assertTrue(DateUtils.isSameDay(dateA, (Date) dateA.clone()));
+        assertTrue(DateUtils.isSameDay(MAX_DATE, MAX_DATE));
+        assertTrue(DateUtils.isSameDay(MAX_DATE, (Date) MAX_DATE.clone()));
     }
 
     @Test
@@ -1295,6 +1320,7 @@ class DateUtilsTest extends AbstractLangTest {
     @Test
     void testToCalendar() {
         assertEquals(date1, DateUtils.toCalendar(date1).getTime(), "Failed to convert to a Calendar and back");
+        assertEquals(MAX_DATE, DateUtils.toCalendar(MAX_DATE).getTime(), "Failed to convert to a Calendar and back");
         assertNullPointerException(() -> DateUtils.toCalendar(null));
     }
 
@@ -1558,7 +1584,7 @@ class DateUtilsTest extends AbstractLangTest {
     @Test
     void testTruncate_Bugzilla_31395() throws Exception {
         // Bug 31395, large dates
-        final Date endOfTime = new Date(Long.MAX_VALUE); // fyi: Sun Aug 17 07:12:55 CET 292278994 -- 807 millis
+        final Date endOfTime = MAX_DATE; // fyi: Sun Aug 17 07:12:55 CET 292278994 -- 807 millis
         final GregorianCalendar endCal = new GregorianCalendar();
         endCal.setTime(endOfTime);
         assertThrows(ArithmeticException.class, () -> DateUtils.truncate(endCal, Calendar.DATE));

@@ -19,6 +19,7 @@ package org.apache.commons.lang3.time;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -393,6 +394,14 @@ class StopWatchTest extends AbstractLangTest {
     }
 
     @Test
+    void testSplitGetStopInstant() {
+      final StopWatch watch = StopWatch.createStarted();
+      watch.split();
+      assertNotNull(watch.getStopTime());
+      assertNotNull(watch.getStopInstant());
+    }
+
+    @Test
     void testSplitsWithStringLabels() {
         final StopWatch watch = new StopWatch();
         final String firstLabel = "one";
@@ -423,9 +432,23 @@ class StopWatchTest extends AbstractLangTest {
     }
 
     @Test
+    void testSplitWithLabelGetStopInstant() {
+      final StopWatch watch = StopWatch.createStarted();
+      watch.split("one");
+      assertNotNull(watch.getStopTime());
+      assertNotNull(watch.getStopInstant());
+    }
+
+    @Test
     void testStatic() {
         final StopWatch watch = StopWatch.createStarted();
         assertTrue(watch.isStarted());
+    }
+
+    @Test
+    void testGetStopTime() throws InterruptedException {
+        final StopWatch watch = StopWatch.createStarted();
+        assertEquals(0, watch.getStopTime());
     }
 
     @Test

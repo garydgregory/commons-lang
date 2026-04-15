@@ -93,7 +93,7 @@ public class StopWatch {
         /**
          * Gets the duration of this split.
          *
-         * @return The duration of this split..
+         * @return The duration of this split.
          */
         public Duration getDuration() {
             return getRight();
@@ -120,14 +120,14 @@ public class StopWatch {
     }
 
     /**
-     * Enumeration type which indicates the split status of a StopWatch.
+     * Enumerates the split states of a StopWatch.
      */
     private enum SplitState {
         SPLIT, UNSPLIT
     }
 
     /**
-     * Enumeration type which indicates the status of a StopWatch.
+     * Enumerates type status of a StopWatch.
      */
     private enum State {
 
@@ -519,7 +519,8 @@ public class StopWatch {
     @Deprecated
     public long getStopTime() {
         // stopTimeNanos stores System.nanoTime() for elapsed time
-        return getStopInstant().toEpochMilli();
+        final Instant stop = getStopInstant();
+        return stop != null ? stop.toEpochMilli() : 0;
     }
 
     /**
@@ -688,7 +689,7 @@ public class StopWatch {
         if (runningState != State.RUNNING) {
             throw new IllegalStateException("Stopwatch is not running.");
         }
-        stopTimeNanos = System.nanoTime();
+        stopSet();
         splitState = SplitState.SPLIT;
         splits.add(new Split(String.valueOf(splits.size()), Duration.ofNanos(stopTimeNanos - startTimeNanos)));
     }
@@ -709,7 +710,7 @@ public class StopWatch {
         if (runningState != State.RUNNING) {
             throw new IllegalStateException("Stopwatch is not running.");
         }
-        stopTimeNanos = System.nanoTime();
+        stopSet();
         splitState = SplitState.SPLIT;
         splits.add(new Split(label, Duration.ofNanos(stopTimeNanos - startTimeNanos)));
     }
@@ -761,10 +762,14 @@ public class StopWatch {
             throw new IllegalStateException("Stopwatch is not running.");
         }
         if (runningState == State.RUNNING) {
-            stopTimeNanos = System.nanoTime();
-            stopInstant = Instant.now();
+            stopSet();
         }
         runningState = State.STOPPED;
+    }
+
+    private void stopSet() {
+        stopTimeNanos = System.nanoTime();
+        stopInstant = Instant.now();
     }
 
     /**
@@ -780,8 +785,7 @@ public class StopWatch {
         if (runningState != State.RUNNING) {
             throw new IllegalStateException("Stopwatch must be running to suspend.");
         }
-        stopTimeNanos = System.nanoTime();
-        stopInstant = Instant.now();
+        stopSet();
         runningState = State.SUSPENDED;
     }
 
@@ -835,5 +839,4 @@ public class StopWatch {
         splitState = SplitState.UNSPLIT;
         splits.remove(splits.size() - 1);
     }
-
 }
