@@ -365,6 +365,7 @@ public class NumberUtils {
                 break;
             }
         }
+        final char lastChar = str.charAt(length - 1);
         if (pfxLen > 0) { // we have a hex number
             char firstSigDigit = 0; // strip leading zeroes
             for (int i = pfxLen; i < length; i++) {
@@ -374,16 +375,22 @@ public class NumberUtils {
                 }
                 pfxLen++;
             }
-            final int hexDigits = length - pfxLen;
+            final boolean isLongCh = lastChar == 'l' || lastChar == 'L';
+            int hexDigits = length - pfxLen;
+            if (isLongCh) {
+                hexDigits--;
+            }
             if (hexDigits > 16 || hexDigits == 16 && firstSigDigit > '7') { // too many for Long
                 return createBigInteger(str);
+            }
+            if (isLongCh) {
+                return createLong(str.substring(0, str.length() - 1));
             }
             if (hexDigits > 8 || hexDigits == 8 && firstSigDigit > '7') { // too many for an int
                 return createLong(str);
             }
             return createInteger(str);
         }
-        final char lastChar = str.charAt(length - 1);
         final String mant;
         final String dec;
         final String exp;
@@ -494,7 +501,8 @@ public class NumberUtils {
         try {
             final Float f = createFloat(str);
             final Double d = createDouble(str);
-            if (!f.isInfinite() && !(f.floatValue() == 0.0F && !isZero(mant, dec)) && f.toString().equals(d.toString())) {
+            if (!f.isInfinite() && !(f.floatValue() == 0.0F && !isZero(mant, dec))
+                    && ((double) d.floatValue() == d.doubleValue() || f.toString().equals(d.toString()))) {
                 return f;
             }
             if (!d.isInfinite() && !(d.doubleValue() == 0.0D && !isZero(mant, dec))) {
@@ -511,11 +519,7 @@ public class NumberUtils {
     }
 
     /**
-     * Utility method for {@link #createNumber(String)}.
-     *
-     * <p>
-     * Returns mantissa of the given number.
-     * </p>
+     * Gets the mantissa of the given number.
      *
      * @param str     the string representation of the number.
      * @param stopPos the position of the exponent or decimal point.
@@ -533,11 +537,7 @@ public class NumberUtils {
     }
 
     /**
-     * Utility method for {@link #createNumber(java.lang.String)}.
-     *
-     * <p>
-     * Returns {@code true} if s is {@code null} or empty.
-     * </p>
+     * Tests whether the given string only contains {@code '0'} characters.
      *
      * @param str the String to check.
      * @return if it is all zeros or {@code null}.

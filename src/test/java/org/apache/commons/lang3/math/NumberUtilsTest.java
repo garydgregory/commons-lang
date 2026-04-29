@@ -44,7 +44,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Tests {@link org.apache.commons.lang3.math.NumberUtils}.
+ * Tests {@link NumberUtils}.
  */
 class NumberUtilsTest extends AbstractLangTest {
 
@@ -1232,6 +1232,31 @@ class NumberUtilsTest extends AbstractLangTest {
         assertFalse(isParsableShort("１ ２ ３"));
     }
 
+    /**
+     * Tests <a href="https://issues.apache.org/jira/browse/LANG-1821">LANG-1821</a>.
+     */
+    @Test
+    void testLang1821() {
+        compareIsCreatableWithCreateNumber("123L", true);
+        compareIsCreatableWithCreateNumber("0xdef", true);
+        compareIsCreatableWithCreateNumber("0xdefL", true);
+        compareIsCreatableWithCreateNumber("0XDEFl", true);
+        // Integer.MAX_VALUE
+        compareIsCreatableWithCreateNumber("0x" + Integer.toHexString(Integer.MAX_VALUE), true);
+        compareIsCreatableWithCreateNumber("0x" + Integer.toHexString(Integer.MAX_VALUE) + "l", true);
+        compareIsCreatableWithCreateNumber("0x" + Integer.toHexString(Integer.MAX_VALUE) + "L", true);
+        compareIsCreatableWithCreateNumber("0X" + Integer.toHexString(Integer.MAX_VALUE), true);
+        compareIsCreatableWithCreateNumber("0X" + Integer.toHexString(Integer.MAX_VALUE) + "l", true);
+        compareIsCreatableWithCreateNumber("0X" + Integer.toHexString(Integer.MAX_VALUE) + "L", true);
+        // Long.MAX_VALUE
+        compareIsCreatableWithCreateNumber("0x" + Long.toHexString(Long.MAX_VALUE), true);
+        compareIsCreatableWithCreateNumber("0x" + Long.toHexString(Long.MAX_VALUE) + "l", true);
+        compareIsCreatableWithCreateNumber("0x" + Long.toHexString(Long.MAX_VALUE) + "L", true);
+        compareIsCreatableWithCreateNumber("0X" + Long.toHexString(Long.MAX_VALUE), true);
+        compareIsCreatableWithCreateNumber("0X" + Long.toHexString(Long.MAX_VALUE) + "l", true);
+        compareIsCreatableWithCreateNumber("0X" + Long.toHexString(Long.MAX_VALUE) + "L", true);
+    }
+
     @Test
     void testLang300() {
         NumberUtils.createNumber("-1l");
@@ -1698,7 +1723,7 @@ class NumberUtilsTest extends AbstractLangTest {
         assertInstanceOf(BigDecimal.class, NumberUtils.createNumber("0001.797693134862315759e+308"));
         assertInstanceOf(BigDecimal.class, NumberUtils.createNumber("-001.797693134862315759e+308"));
         assertInstanceOf(BigDecimal.class, NumberUtils.createNumber("+001.797693134862315759e+308"));
-        //LANG-1613
+        // LANG-1613
         assertInstanceOf(Double.class, NumberUtils.createNumber("2.2250738585072014E-308"));
         assertInstanceOf(Double.class, NumberUtils.createNumber("2.2250738585072014E-308D"));
         assertInstanceOf(Double.class, NumberUtils.createNumber("2.2250738585072014E-308F"));
@@ -1710,6 +1735,33 @@ class NumberUtilsTest extends AbstractLangTest {
         assertInstanceOf(Double.class, NumberUtils.createNumber("1.7976931348623157E308F"));
         assertInstanceOf(Double.class, NumberUtils.createNumber("4.9e-324D"));
         assertInstanceOf(Double.class, NumberUtils.createNumber("4.9e-324F"));
+        // LANG-1444
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.1"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.01"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.0001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.00001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.000001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.0000001"));
+        assertInstanceOf(Double.class, NumberUtils.createNumber("1.00000001"));
+        assertInstanceOf(Double.class, NumberUtils.createNumber("1.000000001"));
+        assertInstanceOf(Double.class, NumberUtils.createNumber("1.0000000001"));
+        assertInstanceOf(Double.class, NumberUtils.createNumber("1.00000000001"));
+        assertInstanceOf(Double.class, NumberUtils.createNumber("1.000000000001"));
+        assertInstanceOf(Double.class, NumberUtils.createNumber("1.0000000000001"));
+        assertInstanceOf(Double.class, NumberUtils.createNumber("1.00000000000001"));
+        assertInstanceOf(Double.class, NumberUtils.createNumber("1.000000000000001"));
+        // Now we get Floats: This happens because Double.valueOf("1.000000000000001") = 1.000000000000001 and Double.valueOf("1.0000000000000001") = 1.0. In
+        // the latter case because we've lost the precision, it no longer matters whether we store the number as a Double or a Float, so we use a Float because
+        // it's been truncated.
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.0000000000000001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.00000000000000001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.000000000000000001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.0000000000000000001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.00000000000000000001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.000000000000000000001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.0000000000000000000001"));
+        assertInstanceOf(Float.class, NumberUtils.createNumber("1.00000000000000000000001"));
     }
 
     /**
